@@ -1,11 +1,8 @@
 package project;
 
-import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Dimension;
 import java.awt.CardLayout;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -17,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,6 +27,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.JTable;
 
 public class SearchEngineApp {
@@ -52,6 +50,7 @@ public class SearchEngineApp {
 	private JLabel option5;
 	
 	/*Levels*/
+	private final String MAIN_SCREEN = "name_497874984089806";
 	private final String GAME_SCREEN = "name_657072334260825";
 	private final String RESULT_SCREEN = "name_497882824621463";
 	private final String ALLRESULTS_SCREEN = "name_657911603915068";
@@ -64,16 +63,8 @@ public class SearchEngineApp {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					SearchEngineApp window = new SearchEngineApp();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		SearchEngineApp window = new SearchEngineApp();
+		window.frame.setVisible(true);
 	}
 
 	/**
@@ -100,7 +91,7 @@ public class SearchEngineApp {
 		mainScreen.setForeground(new Color(0, 0, 0));
 		frame.getContentPane().add(mainScreen, "name_497874984089806");
 		mainScreen.setLayout(null);
-		
+
 		JLabel lblNewLabel = new JLabel("Projeto MPEI");
 		lblNewLabel.setForeground(new Color(72, 209, 204));
 		lblNewLabel.setFont(new Font("Impact", Font.PLAIN, 80));
@@ -325,7 +316,7 @@ public class SearchEngineApp {
 		occurrencesScreen.setBackground(Color.WHITE);
 		frame.getContentPane().add(occurrencesScreen, OCCURRENCES_SCREEN);
 		occurrencesScreen.setLayout(null);
-		
+
 		JLabel lblNumberOfOccurrences = new JLabel("Number of Occurrences");
 		lblNumberOfOccurrences.setBounds(87, 57, 587, 43);
 		lblNumberOfOccurrences.setHorizontalAlignment(SwingConstants.LEFT);
@@ -333,19 +324,30 @@ public class SearchEngineApp {
 		lblNumberOfOccurrences.setFont(new Font("Impact", Font.PLAIN, 50));
 		occurrencesScreen.add(lblNumberOfOccurrences);
 		
+		occurrencesText = new JTable();
 		try {
 			occurrencesText = WebPageUtils.loadTable(
-					WebPageUtils.loadPageOccurrencesFromFile("generated_page_content.txt"));
+								WebPageUtils.loadPageOccurrencesFromFile("page_content.txt"));
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			System.exit(1);
 		}
-		
 		occurrencesText.setEnabled(false);
-		occurrencesText.setBounds(110, 170, 620, 350);
+		occurrencesText.setBounds(87, 168, 620, 200);
 		occurrencesText.setFont(new Font("Arial", Font.PLAIN, 18));
 		occurrencesText.setFillsViewportHeight(true);
 		occurrencesScreen.add(occurrencesText);
+		
+		JButton refreshButton = new JButton("Refresh");
+		refreshButton.setFont(new Font("Arial", Font.PLAIN, 20));
+		refreshButton.setBackground(new Color(255, 218, 185));
+		refreshButton.setBounds(179, 440, 159, 40);
+		occurrencesScreen.add(refreshButton);
+		
+		JButton backButtonOcurrences = new JButton("Back");
+		backButtonOcurrences.setFont(new Font("Arial", Font.PLAIN, 20));
+		backButtonOcurrences.setBackground(new Color(255, 218, 185));
+		backButtonOcurrences.setBounds(422, 439, 159, 40);
+		occurrencesScreen.add(backButtonOcurrences);
 		
 		/*
 		 * Action Listeners
@@ -386,10 +388,28 @@ public class SearchEngineApp {
 				changeScreen(OCCURRENCES_SCREEN);
 			}
 		});
+		backButtonOcurrences.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				changeScreen(MAIN_SCREEN);
+			}
+		});
+		refreshButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent args0) {
+				try {
+					updateTable(WebPageUtils.loadTable(
+							WebPageUtils.loadPageOccurrencesFromFile("page_content.txt")));
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+			}
+		});
 		
 	}
 	
-	public void generateRandomPages() {
+	private void generateRandomPages() {
 		
 		try {
 			String[] randPages = searchEngine.generateWikiRandomSites();
@@ -407,7 +427,7 @@ public class SearchEngineApp {
 		}
 	}
 	
-	public void openBrowser(String url) {
+	private void openBrowser(String url) {
 		try {
 			Desktop.getDesktop().browse(new URI(url));
 		} catch (IOException e1) {
@@ -419,7 +439,16 @@ public class SearchEngineApp {
 		}
 	}
 	
-	public void changeScreen(String name) {
+	private void updateTable(JTable table) throws IOException {
+		occurrencesText.setModel(new DefaultTableModel(
+				WebPageUtils.loadData(
+						WebPageUtils.loadPageOccurrencesFromFile("page_content.txt")),
+						new String[] { "Page Title","Number of Occurrences" }));
+		((AbstractTableModel) occurrencesText.getModel()).fireTableDataChanged();
+		occurrencesText.repaint();
+	}
+	
+	private void changeScreen(String name) {
 		/* If it changes to the game screen, it will generate 5 random webpages */
 		if(name.equals(GAME_SCREEN)) {
 			clearInputTextField();
@@ -437,21 +466,14 @@ public class SearchEngineApp {
 			showAllResults();
 		}
 		else if(name.equals(OCCURRENCES_SCREEN)){
-			try {
-				occurrencesText = WebPageUtils.loadTable(
-										WebPageUtils.loadPageOccurrencesFromFile("generated_page_content.txt"));
-				occurrencesText.setFillsViewportHeight(true);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
+			
 		}
 		/*Changes to the given screen*/
 		((CardLayout)frame.getContentPane().getLayout())
 		.show(frame.getContentPane(), name);
 	}
 	
-	public void showAllResults() {
+	private void showAllResults() {
 		
 		List<WebPageResult> lastResults = searchEngine.getLastResults();
 		String str = "";
@@ -467,7 +489,7 @@ public class SearchEngineApp {
 		pageContentField.setText("");
 	}
 	
-	public boolean guess(String text) {
+	private boolean guess(String text) {
 		if(text.length() == 0) {
 			JOptionPane.showMessageDialog(null, "Invalid input.");
 			return false;
