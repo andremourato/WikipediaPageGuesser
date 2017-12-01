@@ -39,7 +39,8 @@ public abstract class WebPageUtils{
 	public static Map<String, Integer> loadPageOccurrencesFromFile(String file) throws IOException{
 		Map<String, Integer> occurrences = new TreeMap<>();
 		List<String> lines = Files.readAllLines(Paths.get(file), Charset.defaultCharset());
-		//Keeps track of the contents that have been read
+		//Keeps track of the contents that have b-een read
+		
 		List<String> currentContentsRead = new ArrayList<>();
 		for(int i = 0; i < lines.size(); i++) {
 			String line = lines.get(i);
@@ -60,28 +61,6 @@ public abstract class WebPageUtils{
 		}
 		return occurrences;
 	}
-	
-	public static String occurrencesMapToString(Map<String,Integer> map) {
-		String str = "";
-		for(String key : map.keySet()) {
-			str += String.format("%30s%5s\n",key,map.get(key));
-		}
-		return str;
-	}
-	
-	public static JTable loadTable(Map<String,Integer> map) {
-		Set<String> keys = map.keySet();
-		Object[][] data = new String[keys.size()][2];
-		Object[] sections = { "Page Title","Number of Occurrences" };
-		int y = 0;
-		for(String key : keys) {
-			data[y][0] = key;
-			data[y++][1] = String.valueOf(map.get(key));
-		}		
-		return new JTable(data, sections);
-		
-	}
-	
 	
 	/*
 	 * A version of contains() but uses the value of jaccard similarity
@@ -104,6 +83,30 @@ public abstract class WebPageUtils{
 				return true;
 		}
 		return false;
+	}
+	
+	public static String occurrencesMapToString(Map<String,Integer> map) {
+		String str = "";
+		for(String key : map.keySet()) {
+			str += String.format("%30s%5s\n",key,map.get(key));
+		}
+		return str;
+	}
+	
+	public static JTable loadTable(Map<String,Integer> map) {
+		Object[] sections = { "Page Title","Number of Occurrences" };
+		return new JTable(loadData(map), sections);
+	}
+	
+	public static Object[][] loadData(Map<String,Integer> map){
+		Set<String> keys = map.keySet();
+		Object[][] data = new String[keys.size()][2];
+		int y = 0;
+		for(String key : keys) {
+			data[y][0] = key;
+			data[y++][1] = String.valueOf(map.get(key));
+		}
+		return data;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -141,14 +144,17 @@ public abstract class WebPageUtils{
 	}
 	
 	public static void main(String[] args) throws MalformedURLException, IOException, FileNotFoundException {
-		String filename = "generated_page_content.txt";
-		exportToFile(generateRandomPageContent(10000),filename);
-		try {
-			appendToFile(new String[] {"https://pt.wikipedia.org/wiki/Portugal","https://pt.wikipedia.org/wiki/Portugal"},filename);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		String filename = "page_content.txt";
+		String[] urls = {
+			"https://pt.wikipedia.org/wiki/Portugal","https://pt.wikipedia.org/wiki/Cristiano_Ronaldo",
+			"https://pt.wikipedia.org/wiki/Lisboa","https://pt.wikipedia.org/wiki/Marcelo_Rebelo_de_Sousa",
+			"https://pt.wikipedia.org/wiki/Marcelo_Rebelo_de_Sousa","https://pt.wikipedia.org/wiki/Marcelo_Rebelo_de_Sousa",
+			"https://pt.wikipedia.org/wiki/Lisboa","https://pt.wikipedia.org/wiki/Natal",
+			"https://pt.wikipedia.org/wiki/Lisboa","https://pt.wikipedia.org/wiki/Natal",
+			"https://pt.wikipedia.org/wiki/Cristiano_Ronaldo","https://pt.wikipedia.org/wiki/Cristiano_Ronaldo"
+			
+		};
+		exportToFile(urls,filename);
 	}
 		
 }
