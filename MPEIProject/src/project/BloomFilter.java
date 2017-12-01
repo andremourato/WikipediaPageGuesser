@@ -18,7 +18,7 @@ public class BloomFilter {
 		for(int i = 1; i <= numHash; i++) {
 			str += i;
 			int hash = Math.abs(str.hashCode());
-			hash = (hash % set.length) + 1;
+			hash = Math.abs(hash % set.length);
 			set[hash] = true;
 		}
 	}
@@ -36,7 +36,7 @@ public class BloomFilter {
 		for(int i = 1; i <= numHash; i++) {
 			str += i;
 			int hash = Math.abs(str.hashCode());
-			hash = (hash % set.length) + 1;
+			hash = Math.abs(hash % set.length);
 			if(!set[hash]) {
 				member = false;
 				break;
