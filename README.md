@@ -4,6 +4,7 @@ Wikipedia Page Guesser is divided into 2 parts.
 The first part consists in a game that will guess the Wikipedia page chosen by the user.  
 The second part consists in the comparison of the content of a Wikipedia page written into a file. This will not be explained in this README.  
 WikipediaPageGuesser uses a Java wiki bot framework. For more information on this framework please visit https://github.com/MER-C/wiki-java
+The java JTML Parser JSoup was also used. For more information visit https://jsoup.org/
 
 # Modules #
   - Similarity Module
